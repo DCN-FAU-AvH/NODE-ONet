@@ -154,7 +154,7 @@ def gen_2D_NS_data(N_x, N_t, N_v_x, N_v_num, T, visc, f_input, wi_input, device)
     X_base, Y_base = torch.meshgrid(x_vals, x_vals, indexing='ij')
     # Generate the base forcing function and initial condition
     if f_input == True:
-        f_base = GaussianRF(2, N_database, alpha=10, tau=7, device=device).sample(N_v_num)
+        f_base = GaussianRF(2, N_database, alpha=5, tau=3, device=device).sample(N_v_num)
     if wi_input == True:
         wi_base = GaussianRF(2, N_database, alpha=2.5, tau=7, device=device).sample(N_v_num)
 

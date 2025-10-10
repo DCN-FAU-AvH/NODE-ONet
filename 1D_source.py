@@ -8,6 +8,7 @@ from models.neural_odes import SA_NODE, Vanilla_NODE
 from models.training import Trainer
 from models.plot import plot_compare
 import torch
+import numpy as np
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')   # mps is for Mac, cuda is for Linux GPU
 
@@ -18,17 +19,19 @@ def main():
     # Data Generation
     X = 1       # X is the length of the domain [0, X]
     T = 1       # T is the final time
-    N_x = 50    # N_x is the number of spatial points
+    N_x = 100    # N_x is the number of spatial points
     N_t = 10    # N_t is the number of time points
     k = 0.01    # Reaction coefficient
     D_const = 0.01    # Diffusion coefficient constant
     time_steps = N_t     # Number of time steps
     l = 0.5     # l is the length scale of the random field
-    N_v_x = 20    # N_v_x is the number of spatial points for the random field
-    N_v_num = 100   # N_v_num is the number of random fields
+    N_v_x = 100    # N_v_x is the number of spatial points for the random field
+    N_v_num = 500   # N_v_num is the number of random fields
     v_type = 'nonzero'    # Type of the random field, 'zero', 'nonzero' or 'const'
     D_type = 'const'    # Type of diffusion coefficient, 'const' or 'nonconst'
-    space = GRF(X, length_scale=l, N=1000, interp="cubic")
+    seed = 42
+    np.random.seed(seed)  # seed global RNG for reproducibility of data splitting
+    space = GRF(X, length_scale=l, N=1000, interp="cubic", seed=seed)
     ux_train, ux_v_train, v_train, D_train, t_train, x_train = DR_System(N_v_x, N_x, k, D_const, T, N_t, N_v_num, space, v_type, D_type, device).solve()
 
 
@@ -39,7 +42,7 @@ def main():
     hidden_dim = 100        # Dimension of the hidden layers
     hidden_layers = 2       # Number of hidden layers
     lr_adam = 1e-3          # Learning rate for Adam
-    num_epochs_adam = 50000       # Number of epochs for Adam
+    num_epochs_adam = 500000       # Number of epochs for Adam
     num_epochs_lbfgs = 100        # Number of epochs for L-BFGS
     lr_lbfgs = 1e-2            # Learning rate for L-BFGS
     reg_type = 'l1'         # Regularization type, 'l1' or 'barron'
@@ -70,9 +73,9 @@ def main():
     # TRAINING
     # =============================================================================
     trainer = Trainer(node, basis, device, reg=reg_type, logger=logger)
-    # first 1000 epochs with Adam
+    # first num_epochs_adam epochs with Adam
     trainer.train(ux_train, ux_v_train, v_train, D_train, x_train, t_train, optimizer_adam, optimizer_type='adam', num_epochs=num_epochs_adam)
-    # next 1000 epochs with L-BFGS
+    # next num_epochs_lbfgs epochs with L-BFGS
     # trainer.train(ux_train, ux_v_train, v_train, D_train, x_train, t_train, optimizer_lbfgs, optimizer_type='lbfgs', num_epochs=num_epochs_lbfgs)
     
     # Save the model
@@ -85,8 +88,8 @@ def main():
     # Test by defining new parameters: N_x, N_t, l, N_v_num   
     N_t = 100
     N_x = 100
-    T=1
-    N_v_num = 1000
+    T = 1
+    N_v_num = 10000
     ux_test, ux_v_test, v_test, D_test, t_test, x_test = DR_System(N_v_x, N_x, k, D_const, T, N_t, N_v_num, space, v_type, D_type, device).solve()
 
     u_operator = trainer.compute_u_operator(ux_v_test, v_test, D_test, t_test, x_test)  # Compute the operator and squeeze the last dimension

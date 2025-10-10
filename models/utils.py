@@ -67,28 +67,48 @@ class ReLUk(nn.Module):  # Define ReLU^k activation function
     def forward(self, x):
         return torch.pow(torch.relu(x), self.k)
     
-
 class GRF(object):
-    def __init__(self, T, kernel="RBF", length_scale=1, N=1000, interp="cubic"):
-        self.N = N
+    def __init__(
+        self,
+        T,
+        kernel="RBF",
+        length_scale=1.0,
+        N=1000,
+        interp="cubic",
+        seed=42,                    # <<--- NEW: per-instance seed
+        jitter=1e-13,                 # <<--- make jitter explicit/controllable
+        rng=None                      # <<--- alternatively pass a Generator
+    ):
+        self.N = int(N)
         self.interp = interp
-        self.x = np.linspace(0, T, num=N)[:, None]
+        self.x = np.linspace(0, T, num=self.N)[:, None]
+
         if kernel == "RBF":
             K = gp.kernels.RBF(length_scale=length_scale)
         elif kernel == "AE":
             K = gp.kernels.Matern(length_scale=length_scale, nu=0.5)
+        else:
+            raise ValueError(f"Unknown kernel: {kernel}")
+
         self.K = K(self.x)
-        self.L = np.linalg.cholesky(self.K + 1e-13 * np.eye(self.N))
+        # deterministic given K and jitter (threading set to 1 helps bit-stability)
+        self.L = np.linalg.cholesky(self.K + jitter * np.eye(self.N))
+
+        # --- NEW: local RNG that isolates you from global NumPy state
+        if rng is not None and seed is not None:
+            raise ValueError("Provide either 'seed' or 'rng', not both.")
+        if rng is None:
+            self.rng = np.random.default_rng(seed)
+        else:
+            self.rng = rng  # must be a numpy.random.Generator
 
     def random(self, n):
-        """Generate `n` random feature vectors.
-        """
-        u = np.random.randn(self.N, n)
-        return np.dot(self.L, u).T
+        """Generate `n` random feature vectors (shape: n x N)."""
+        # use the per-instance RNG instead of global np.random
+        u = self.rng.standard_normal((self.N, n))
+        return (self.L @ u).T
 
     def eval_u_one(self, y, x):
-        """Compute the function value at `x` for the feature `y`.
-        """
         if self.interp == "linear":
             return np.interp(x, np.ravel(self.x), y)
         f = interpolate.interp1d(
@@ -97,11 +117,9 @@ class GRF(object):
         return f(x)
 
     def eval_u(self, ys, sensors):
-        """For a list of functions represented by `ys`,
-        compute a list of a list of function values at a list `sensors`.
-        """
         if self.interp == "linear":
             return np.vstack([np.interp(sensors, np.ravel(self.x), y).T for y in ys])
+        from pathos.multiprocessing import ProcessPool  # or wherever ProcessPool comes from
         p = ProcessPool(nodes=4)
         res = p.map(
             lambda y: interpolate.interp1d(
@@ -110,6 +128,3 @@ class GRF(object):
             ys,
         )
         return np.vstack(list(res))
-    
-
-

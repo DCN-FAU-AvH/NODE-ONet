@@ -17,7 +17,7 @@ def main():
     # =============================================================================
     # Data Generation
     T = 10       # T is the final time
-    N_x = 64    #N_x is the number of spatial points
+    N_x = 50    #N_x is the number of spatial points
     N_t = 10    # N_t is the number of time points
     time_steps = N_t    # Number of time steps
     N_v_x = 50    # N_v_x is the number of spatial points for the random field
@@ -32,11 +32,11 @@ def main():
     data_dim = 2            # Dimension of the Problem
     dim_v = N_v_x**2       # Dimension of the R^{dv} space
     dim_u = 200              # Dimension of the R^{du} space
-    hidden_dim = 200         # Dimension of the hidden layers
-    hidden_layers = 2       # Number of hidden layers
+    hidden_dim = 2000         # Dimension of the hidden layers
+    hidden_layers = 4       # Number of hidden layers
     lr_adam = 1e-3          # Learning rate for Adam
-    num_epochs_adam = 10       # Number of epochs for Adam
-    num_epochs_lbfgs = 1        # Number of epochs for L-BFGS
+    num_epochs_adam = 500000       # Number of epochs for Adam
+    num_epochs_lbfgs = 100        # Number of epochs for L-BFGS
     lr_lbfgs = 1e-2            # Learning rate for L-BFGS
     reg_type = 'l1'         # Regularization type, 'l1' or 'barron'
     # Logging and Saving
@@ -77,7 +77,7 @@ def main():
     # TESTING
     # =============================================================================
     T = 10       
-    N_v_num_test = 2
+    N_v_num_test = 200
     N_x = 100
     N_t = 100
     print(f"Testing for T={T}")
