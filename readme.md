@@ -1,7 +1,7 @@
 # Deep Neural ODE Operator Networks for PDEs
 
 **NODE-ONet** (deep neural ordinary differential equation operator network) is a framework for learning solution operators of partial differential equations (PDEs). By integrating neural ODEs (NODEs) within an encoder-decoder architecture, the NODE-ONet framework effectively decouples spatial and temporal variables, aligning with traditional numerical methods for time-dependent PDEs.  This repository provides a PyTorch implementation of NODE-ONet and compares its performance against DeepONet and MIONet on various simulation tasks. 
-The source code is for the paper: 
+The source code is for the paper: [Z. Li, K. Liu, Y. Song, H. Yue, E. Zuazua. Deep Neural ODE Operator Networks for PDEs, arXiv: 2510.15651, 2025](https://arxiv.org/abs/2510.15651)
 
 ## Installation
 
