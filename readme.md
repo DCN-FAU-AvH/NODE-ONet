@@ -13,13 +13,11 @@ This repository includes several demo scripts to run experiments. Each demo can 
 
 **(1) A 1D nonlinear diffusion-reaction equation**
 $$
-\left\{
-{\begin{aligned}
-		&\partial_t u(t,x)-\nabla\cdot(D(t,x)\nabla u(t,x))+R(t,x)u^2(t,x)=f(t,x) &\forall (t,x)\in [0,T]\times \Omega,\\
-		&u(0,x)=u_0(x) & \forall x\in \Omega,\\
-		&u(t,x)=u_b(t,x) &\forall (t,x)\in [0,T]\times \partial\Omega,
-	\end{aligned}}
-	\right.
+\begin{cases}
+\partial_t u(t,x)-\nabla\!\cdot\!\big(D(t,x)\nabla u(t,x)\big)+R(t,x)\,u^2(t,x)=f(t,x), & (t,x)\in[0,T]\times\Omega,\\
+u(0,x)=u_0(x), & x\in\Omega,\\
+u(t,x)=u_b(t,x), & (t,x)\in[0,T]\times\partial\Omega .
+\end{cases}
 $$
 
 - **Learn the source-to-solution operator $\Psi_f^{\dagger}:f\mapsto u$:**
@@ -44,21 +42,19 @@ $$
 
 **(2) A 2D Navier-Stokes equation**
 $$
-\left\{
-\begin{aligned}
-  &\partial_t u(t,x) + {V(t,x)} \cdot \nabla u(t,x)= \nu \Delta u(t,x)+ f(t,x), \quad &\forall (t,x)\in [0,T]\times \Omega, \\
-  & u(t,x) = \nabla\times {V(t,x)} \coloneqq \partial_{x_1} {V}_2-\partial_{x_2} {V}_1, \quad &\forall (t,x)\in [0,T]\times \Omega, \\
-  &\nabla \cdot {V(t,x)} = 0, \quad &\forall (t,x)\in [0,T]\times \Omega, \\
-  &u(x, 0) = u_0(x), \quad &x \in \Omega.
-\end{aligned}
-\right.
+\begin{cases}
+\partial_t u(t,x)+\mathbf{V}(t,x)\cdot\nabla u(t,x)=\nu\,\Delta u(t,x)+f(t,x), & (t,x)\in[0,T]\times\Omega,\\
+u(t,x)=\nabla\times\mathbf{V}(t,x)\coloneqq \partial_{x_1} V_2-\partial_{x_2} V_1, & (t,x)\in[0,T]\times\Omega,\\
+\nabla\cdot\mathbf{V}(t,x)=0, & (t,x)\in[0,T]\times\Omega,\\
+u(x,0)=u_0(x), & x\in\Omega .
+\end{cases}
 $$
 
 
 Run `2D_NS.py` to train the NODE-ONet to learn the following three operators:
 
-- **The initial value-to-solution operator $\Psi_i: u_0\mapsto u$ **with the fixed source term $f(x_1,x_2)=0.1 \sin(2\pi(x_1 + x_2)) + 0.1 \cos(2\pi(x_1 + x_2))$;
-- **The source-to-solution operator $\Psi_f: f\mapsto u$ **with the fixed initial value $u_0(x_1,x_2)=0.1 \sin(2\pi(x_1 + x_2)) + 0.1 \cos(2\pi(x_1 + x_2))$;
+- **The initial value-to-solution operator $\Psi_i: u_0\mapsto u$**with the fixed source term $f(x_1,x_2)=0.1 \sin(2\pi(x_1 + x_2)) + 0.1 \cos(2\pi(x_1 + x_2))$;
+- **The source-to-solution operator $\Psi_f: f\mapsto u$**with the fixed initial value $u_0(x_1,x_2)=0.1 \sin(2\pi(x_1 + x_2)) + 0.1 \cos(2\pi(x_1 + x_2))$;
 - **The solution operator with multi-input $\Psi_m: \{u_0,f\}\mapsto u$**.
 
 ## Citation
