@@ -1,0 +1,9 @@
+matplotlib==3.8.4
+numpy==2.3.3
+pathos==0.3.3
+pytz==2024.1
+rich==14.2.0
+scikit_learn==1.4.2
+scipy==1.16.2
+torch==2.2.2
+torchdiffeq==0.2.3
